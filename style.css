@@ -2,10 +2,12 @@ html{
     scroll-behavior: smooth;
 }
 body{
-    background-color: aquamarine;
+    background-color: #555555;
+    color: olive;
+    font-family: verdana;
 }
 .dog{
-    background-color: #000099;
+    background-color: #0000dd;
     color: fuchsia;
 }
 .parallax {
@@ -24,6 +26,222 @@ body{
 #aboutMe{
     background-color: white;
 }
-li:hover{
-    
+nav li:hover{
+    background-color: red;
+    /* 2. Scale up on hover (1.1 = 110% of original size) */
+  transform: scale(1.1);
+}
+.project{
+    font-family: Georgia;
+    color: #212121;
+}
+@keyframes permanentColorChange{
+    from{
+        background-color: black;
+        border-style: solid;
+    }
+    to{
+        background-color: white;
+        border-style: groove;
+    }
+}
+#projectBreak{
+    border-width: 10px;
+    border-color: black;
+}
+nav{
+    border-color: cyan;
+    animation-name: permanentColorChange;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+#mapDiv{
+    display: flex;
+    justify-content: center;
+    background-color: lightyellow;
+}
+@media screen and (max-width: 768px) {
+  body {
+    background-color: black;
+  }
+  @keyframes permanentColorChange{
+    from{
+        background-color: white;
+        border-style: dashed;
+    }
+    to{
+        background-color: black;
+        border-style: dotted;
+    }
+  }
+  nav{
+    border-color: gold;
+    animation-name: permanentColorChange;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  .parallax{
+    background-attachment: scroll;
+  }
+  .button-container {
+    flex-direction: column;    /* Stacks the buttons vertically */
+    justify-content: center;   /* Centers them along the vertical axis */
+    align-items: center;       /* Centers them horizontally on the screen */
+  }
+
+  /* Optional: Makes buttons span the same width when stacked */
+  .animated-button {
+    width: 100%;               /* Force full-width behavior */
+    max-width: 250px;          /* Prevents them from getting too wide */
+    justify-content: center;   /* Centers the text inside the button */
+  }
+    .button-container {  /* Stacks the buttons vertically */
+    justify-content: center;   /* Centers them along the vertical axis */
+    align-items: center;       /* Centers them horizontally on the screen */
+  }
+}
+/* Target mobile devices (screens 768px wide or smaller) */
+
+/* Change the color of regular links */
+.dog.navbar-inverse .navbar-nav > li > a {
+    color: #ff0000; /* Replace with your desired hex or color name */
+}
+
+/* Change the color of the "Googolplex" brand logo text */
+.dog.navbar-inverse .navbar-brand {
+    color: #ff0000;
+}
+
+/* Change the color of the link when hovered over */
+.dog.navbar-inverse .navbar-nav > li > a:hover,
+.dog.navbar-inverse .navbar-nav > li > a:focus {
+    color: #ffffff; 
+}
+
+/* Change the text color of the currently Active link (e.g., "Bio") */
+.dog.navbar-inverse .navbar-nav > .active > a,
+.dog.navbar-inverse .navbar-nav > .active > a:hover,
+.dog.navbar-inverse .navbar-nav > .active > a:focus {
+    color: #ffffff;
+    background-color: #080808; /* Keeps the active background clean */
+}
+#twozerofoureight{
+    background-color: yellow;
+}
+#snake{
+    background-color: darkgreen;
+}
+#flappybird{
+    background-color: skyblue;
+}
+#trig-subtitle, #trig-title{
+    color: skyblue;
+}
+h4.trig{
+    font-weight: bolder;
+}
+h4.project, .subtitle{
+    color: lime;
+}
+#buttonDiv{
+    background-color: blue;
+    display: grid;
+    place-items: center;
+}
+#cosineDiv{
+    background-color: indigo;
+}
+#projectDivisionPage{
+    background-color: purple;
+}
+/* From Uiverse.io by gharsh11032000 */ 
+.animated-button {
+  position: relative;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 36px;
+  border: 4px solid;
+  border-color: transparent;
+  font-size: 16px;
+  background-color: inherit;
+  border-radius: 100px;
+  font-weight: 600;
+  color: greenyellow;
+  box-shadow: 0 0 0 2px greenyellow;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  display: flex;
+  align-items: center;
+}
+
+.animated-button svg {
+  position: absolute;
+  width: 24px;
+  fill: greenyellow;
+  z-index: 9;
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.animated-button .arr-1 {
+  right: 16px;
+}
+
+.animated-button .arr-2 {
+  left: -25%;
+}
+
+.animated-button .circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-color: greenyellow;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.animated-button .text {
+  position: relative;
+  z-index: 1;
+  transform: translateX(-12px);
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.animated-button:hover {
+  box-shadow: 0 0 0 12px transparent;
+  color: #212121;
+  border-radius: 12px;
+}
+
+.animated-button:hover .arr-1 {
+  right: -25%;
+}
+
+.animated-button:hover .arr-2 {
+  left: 16px;
+}
+
+.animated-button:hover .text {
+  transform: translateX(12px);
+}
+
+.animated-button:hover svg {
+  fill: #212121;
+}
+
+.animated-button:active {
+  scale: 0.95;
+  box-shadow: 0 0 0 4px greenyellow;
+}
+
+.animated-button:hover .circle {
+  width: 220px;
+  height: 220px;
+  opacity: 1;
 }
