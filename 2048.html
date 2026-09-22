@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <title>2048 by Googolplex</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <link rel="icon" href="https://codehs.com/uploads/aa04603bd925a3547d5d93c4c2dc778e" type="image/x-icon">
+      <link rel="stylesheet" type="text/css" href="2048.css">
+    </head>
+    <body>
+        <!--Navbar-->
+        <nav class="dog pt-2 mt-3 navbar navbar-inverse">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="index.html">Googolplex</a>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+              <ul class="nav navbar-nav">
+                <li class="exitLink"><a href="games.html">Exit</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <div class="header">
+        <h1>2048</h1>
+        <div class="score-panel">
+            <div class="score-box">
+                <div class="score-title">Score</div>
+                <div id="score">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-title">Best</div>
+                <div id="best-score">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <p class="instructions">Join tiles to reach the <b>2048</b> mark!</p>
+        <button class="restart-btn" onclick="initGame()">New Game</button>
+    </div>
+
+    <div class="game-container">
+        <div id="grid-background">
+            <!-- 16 Static Backing Squares -->
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+        </div>
+        
+        <div id="tile-container"></div>
+
+        <div id="game-overlay" class="overlay">
+            <p id="overlay-text">Game Over!</p>
+            <button onclick="initGame()">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements & Global State Variables ---
+        const tileContainer = document.getElementById('tile-container');
+        const scoreElement = document.getElementById('score');
+        const bestScoreElement = document.getElementById('best-score');
+        const overlay = document.getElementById('game-overlay');
+        const overlayText = document.getElementById('overlay-text');
+        
+        let board = [];
+        let score = 0;
+        let bestScore = parseInt(localStorage.getItem('bestScore')) || 0;
+        let gameWonHasTriggered = false;
+        
+        // Initialize High Score View display right away
+        bestScoreElement.innerText = bestScore;
+        
+        /**
+         * Initializes/Resets the game state variables, clear elements, and spawns starting positions
+         */
+        function initGame() {
+            // Generate clean empty 4x4 coordinate tracking matrix
+            board = Array(4).fill(null).map(() => Array(4).fill(0));
+            score = 0;
+            gameWonHasTriggered = false;
+            
+            scoreElement.innerText = score;
+            overlay.classList.remove('active');
+            tileContainer.innerHTML = '';
+            
+            // Game begins by spawning two random numbers on the empty grid
+            generateTile();
+            generateTile();
+            renderBoard();
+        }
+        
+        /**
+         * Scans the board state for empty indices and populates one with either a 2 or a 4
+         */
+        function generateTile() {
+            let emptyCells = [];
+            
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (board[r][c] === 0) {
+                        emptyCells.push({ row: r, col: c });
+                    }
+                }
+            }
+            
+            if (emptyCells.length > 0) {
+                let randomIndex = Math.floor(Math.random() * emptyCells.length);
+                let chosenCell = emptyCells[randomIndex];
+                // 90% chance to generate a 2, 10% chance to generate a 4
+                board[chosenCell.row][chosenCell.col] = Math.random() < 0.9 ? 2 : 4;
+            }
+        }
+        
+        /**
+         * Updates the screen DOM view, creating and absolutely styling individual dynamic tiles
+         */
+        function renderBoard() {
+            tileContainer.innerHTML = '';
+            
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    let value = board[r][c];
+                    if (value > 0) {
+                        let tile = document.createElement('div');
+                        tile.innerText = value;
+                        
+                        // Maps positioning class variables (e.g., pos-2-3) to coordinate CSS translation animations
+                        tile.className = `tile pos-${r}-${c}`;
+                        
+                        // Handle theme updates and style fallbacks for high score values
+                        if (value > 65536) {
+                            tile.classList.add('tile-super');
+                        } else {
+                            tile.classList.add(`tile-${value}`);
+                        }
+                        
+                        tileContainer.appendChild(tile);
+                        
+                        // Alert popup logic safely updates target goals once per playthrough
+                        if (value === 2048 && !gameWonHasTriggered) {
+                            showOverlay(true);
+                        }
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Increments current match points and tests memory caching for high records
+         * @param {number} amount - Points to increase score by
+         */
+        function updateScore(amount) {
+            score += amount;
+            scoreElement.innerText = score;
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestScoreElement.innerText = bestScore;
+                localStorage.setItem('bestScore', bestScore);
+            }
+        }
+        
+        /**
+         * Helper utility filtering out all inactive zeros inside a row array
+         * @param {Array} line - A single row or column segment array
+         */
+        function filterZero(line) { 
+            return line.filter(num => num !== 0); 
+        }
+        
+        /**
+         * Core mathematical engine shifting, combining matching values, and pushing elements
+         * @param {Array} line - Active 4-length numeric row array
+         * @param {Array} mergedPositions - Collection logs caching animation indices
+         * @param {number} lineIndex - Target boundary ID currently rendering tracking adjustments
+         * @param {boolean} isVertical - Toggle specifying processing layout context
+         * @param {number} colId - Column index identifier for structural mapping
+         */
+        function slide(line, mergedPositions, lineIndex, isVertical, colId) {
+            let cleanLine = filterZero(line);
+            let result = [];
+            
+            for (let i = 0; i < cleanLine.length; i++) {
+                // If two sequential numbers match, combine them
+                if (cleanLine[i] === cleanLine[i + 1]) {
+                    let combinedValue = cleanLine[i] * 2;
+                    result.push(combinedValue);
+                    updateScore(combinedValue);
+                    
+                    // Cache positions for the visual merge animation
+                    let targetIndex = result.length - 1;
+                    if (isVertical) {
+                        mergedPositions.push({ r: targetIndex, c: colId });
+                    } else {
+                        mergedPositions.push({ r: lineIndex, c: targetIndex });
+                    }
+                    i++; // Skip next element since it was merged
+                } else {
+                    result.push(cleanLine[i]);
+                }
+            }
+            
+            // Fill the rest of the line with zeros
+            while (result.length < 4) { 
+                result.push(0); 
+            }
+            return result;
+        }
+        
+        /**
+         * Orchestrates shift logic translations across all directions
+         * @param {string} direction - Target keyword ('left', 'right', 'up', 'down')
+         */
+        function move(direction) {
+            let preMoveSnapshot = JSON.stringify(board);
+            let mergedPositions = [];
+        
+            if (direction === 'left') {
+                for (let r = 0; r < 4; r++) {
+                    board[r] = slide(board[r], mergedPositions, r, false);
+                }
+            } 
+            else if (direction === 'right') {
+                for (let r = 0; r < 4; r++) {
+                    let reversedRow = board[r].slice().reverse();
+                    let processedRow = slide(reversedRow, mergedPositions, r, false);
+                    board[r] = processedRow.reverse();
+                    
+                    // Re-map horizontal coordinates for items moving right
+                    mergedPositions.forEach(p => { 
+                        if (p.r === r) p.c = 3 - p.c; 
+                    });
+                }
+            } 
+            else if (direction === 'up') {
+                for (let c = 0; c < 4; c++) {
+                    let column = [board[0][c], board[1][c], board[2][c], board[3][c]];
+                    let processedColumn = slide(column, mergedPositions, 0, true, c);
+                    
+                    for (let r = 0; r < 4; r++) {
+                        board[r][c] = processedColumn[r];
+                    }
+                }
+            } 
+            else if (direction === 'down') {
+                for (let c = 0; c < 4; c++) {
+                    let column = [board[0][c], board[1][c], board[2][c], board[3][c]].reverse();
+                    let processedColumn = slide(column, mergedPositions, 0, true, c);
+                    processedColumn.reverse();
+                    
+                    for (let r = 0; r < 4; r++) {
+                        board[r][c] = processedColumn[r];
+                    }
+                    // Re-map vertical coordinates for items moving down
+                    mergedPositions.forEach(p => { 
+                        if (p.c === c) p.r = 3 - p.r; 
+                    });
+                }
+            }
+        
+            // Only update and spawn new tiles if the board configuration actually changed
+            if (preMoveSnapshot !== JSON.stringify(board)) {
+                generateTile();
+                renderBoard();
+                triggerMergeEffects(mergedPositions);
+                
+                // If no more valid moves are available, trigger game over
+                if (!canMove()) {
+                    showOverlay(false);
+                }
+            }
+        }
+        
+        /**
+         * Loops across flagged coordinate points to trigger the pop CSS scale animation
+         * @param {Array} positions - Collection logs caching animation targets
+         */
+        function triggerMergeEffects(positions) {
+            positions.forEach(pos => {
+                let matchingTile = document.querySelector(`.pos-${pos.r}-${pos.c}`);
+                if (matchingTile) {
+                    matchingTile.classList.add('tile-merged');
+                }
+            });
+        }
+        
+        /**
+         * Validates movement paths by testing for empty spaces or adjacent matching pairs
+         */
+        function canMove() {
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (board[r][c] === 0) return true;
+                    if (r < 3 && board[r][c] === board[r + 1][c]) return true;
+                    if (c < 3 && board[r][c] === board[r][c + 1]) return true;
+                }
+            }
+            return false;
+        }
+        
+        /**
+         * Displays the full visual modal message layer over the canvas container
+         * @param {boolean} isWin - State conditional declaring outcome
+         */
+        function showOverlay(isWin) {
+            if (isWin) {
+                gameWonHasTriggered = true;
+                overlayText.innerText = "You Win!";
+            } else {
+                overlayText.innerText = "Game Over!";
+            }
+            overlay.classList.add('active');
+        }
+        
+        // --- Global Input Event Listeners ---
+        window.addEventListener('keydown', (e) => {
+            // Only intercept and prevent default page scrolling for actual directional keys
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                e.preventDefault(); 
+            }
+        
+            if (e.key === 'ArrowLeft') move('left');
+            else if (e.key === 'ArrowRight') move('right');
+            else if (e.key === 'ArrowUp') move('up');
+            else if (e.key === 'ArrowDown') move('down');
+        });
+        
+        // Bootstraps state calculations when layout paints completely
+        window.onload = initGame;
+        </script>
+    </body>
+</html>
